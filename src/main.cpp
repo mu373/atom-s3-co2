@@ -65,7 +65,7 @@ public:
                 if (sscanf(value.c_str(), "CO2=%d,HUM=%f,TMP=%f", &co2, &hum, &tmp) == 3)
                 {
                     // Need correction ?
-                    // tmp -= 4.5F;
+                    tmp -= 4.5F;
                     // hum = (int)(10.0F * hum * 4.0F / 3.0F + 0.5F) / 10.0F;
                     Serial.println(toString());
 
