@@ -164,4 +164,5 @@ void setup()
 void loop()
 {
     usbDev.task();
+    delay(1000);
 }
