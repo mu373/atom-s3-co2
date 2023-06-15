@@ -6,8 +6,7 @@
 
 unsigned long prev_moment, current_moment;
 
-void SendSensorData(int co2, float temp, float hum)
-{
+void SendSensorData(int co2, float hum, float temp) {
     // Initialize ThingSpeak
     WiFiClient client;
     ThingSpeak.begin(client);
@@ -107,7 +106,7 @@ public:
                     current_moment = millis();
                     if ((current_moment - prev_moment) >= THING_SPEAK_INTERVAL)
                     {
-                        SendSensorData(co2, tmp, hum);
+                        SendSensorData(co2, hum, tmp);
                         prev_moment = current_moment;
                     }
 
