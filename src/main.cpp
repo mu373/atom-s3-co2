@@ -4,9 +4,13 @@
 #include "ThingSpeak.h"
 #include "config.h" //enter api key and wifi information
 
+#define DATA_DRAW_INTERVAL 3000
+
 M5Canvas canvas(&M5.Display);
 
-unsigned long prev_moment, current_moment;
+unsigned long prev_moment_thingspeak = 0;
+unsigned long prev_moment_draw = 0;
+unsigned long current_moment;
 
 void SendSensorData(int co2, float hum, float temp) {
     // Initialize ThingSpeak
@@ -108,14 +112,21 @@ public:
                     tmp -= 4.5F;
                     // hum = (int)(10.0F * hum * 4.0F / 3.0F + 0.5F) / 10.0F;
                     Serial.println(toString());
-                    drawCO2data(co2, hum, tmp);
 
-                    // intervalごとにデータ送信
                     current_moment = millis();
-                    if ((current_moment - prev_moment) >= THING_SPEAK_INTERVAL)
+                    
+                    // DATA_DRAW_INTERVAL (ms)ごとに画面描画を更新
+                    if ((current_moment - prev_moment_draw) >= DATA_DRAW_INTERVAL)
+                    {
+                        drawCO2data(co2, hum, tmp);
+                        prev_moment_draw = current_moment;
+                    }
+
+                    // THING_SPEAK_ITNERVAL (ms)ごとにThingSpeakにアップロード
+                    if ((current_moment - prev_moment_thingspeak) >= THING_SPEAK_INTERVAL)
                     {
                         SendSensorData(co2, hum, tmp);
-                        prev_moment = current_moment;
+                        prev_moment_thingspeak = current_moment;
                     }
 
                 }
@@ -133,12 +144,12 @@ UDCO2S usbDev;
 
 void setup()
 {
-    prev_moment = 0; // used for ThingSpeak interval
 
     M5.begin();
     Serial.begin(9600);
 
     // Setup display and canavs
+    M5.Display.setBrightness(100);
     M5.Display.setRotation(1);
     // M5.Display.setColorDepth(24);
     canvas.createSprite(M5.Display.width(), M5.Display.height());
@@ -164,5 +175,4 @@ void setup()
 void loop()
 {
     usbDev.task();
-    delay(1000);
 }
