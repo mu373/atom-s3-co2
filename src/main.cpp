@@ -4,6 +4,8 @@
 #include "ThingSpeak.h"
 #include "config.h" //enter api key and wifi information
 
+M5Canvas canvas(&M5.Display);
+
 unsigned long prev_moment, current_moment;
 
 void SendSensorData(int co2, float hum, float temp) {
@@ -26,6 +28,45 @@ void SendSensorData(int co2, float hum, float temp) {
     {
         Serial.println(String("Problem updating channel. HTTP error code ") + res);
     }
+}
+
+void drawCO2data(int co2, float hum, float tmp) {
+    uint32_t BG_COLOR; // RGB888 (24bit)
+    uint32_t MY_BLUE = 0x38ADFF;
+    uint32_t MY_GREEN = 0x85CC43;
+    uint32_t MY_ORANGE = 0xFFD232;
+    uint32_t MY_RED = 0xE63953;
+    uint32_t MY_PURPLE = 0xA433FF;
+
+    if (co2 <= 700) {
+        BG_COLOR = MY_BLUE;
+    }
+    else if (co2 <= 1000) {
+        BG_COLOR = MY_GREEN;
+    }
+    else if (co2 <= 1200) {
+        BG_COLOR = MY_ORANGE;
+    }
+    else if (co2 <= 1800) {
+        BG_COLOR = MY_RED;
+    }
+    else {
+        BG_COLOR = MY_PURPLE;
+    }
+
+    canvas.fillScreen(BG_COLOR);
+    canvas.setTextColor(WHITE);
+    canvas.setTextDatum(middle_left);
+    canvas.setFont(&fonts::Font4);
+    canvas.setCursor(0, 24);
+    canvas.printf("CO2:%4d", co2);
+    canvas.setCursor(0, 64);
+    canvas.printf("HUM:%.1f", hum);
+    canvas.setCursor(0, 104);
+    canvas.printf("TMP:%.1f", tmp);
+
+    // Push image to display
+    canvas.pushSprite(0, 0);
 }
 
 class UDCO2S : public EspUsbHostSerial
@@ -67,40 +108,7 @@ public:
                     tmp -= 4.5F;
                     // hum = (int)(10.0F * hum * 4.0F / 3.0F + 0.5F) / 10.0F;
                     Serial.println(toString());
-
-                    int BG_COLOR;
-
-                    if (co2 <= 1000)
-                    {
-                        BG_COLOR = BLUE;
-                    }
-                    else if (co2 <= 1500)
-                    {
-                        BG_COLOR = GREEN;
-                    }
-                    else if (co2 <= 2500)
-                    {
-                        BG_COLOR = ORANGE;
-                    }
-                    else if (co2 <= 3500)
-                    {
-                        BG_COLOR = RED;
-                    }
-                    else
-                    {
-                        BG_COLOR = PURPLE;
-                    }
-
-                    M5.Display.clear(BG_COLOR);
-                    M5.Display.setTextColor(WHITE);
-                    M5.Display.setTextDatum(middle_left);
-                    M5.Display.setFont(&fonts::Font4);
-                    M5.Display.setCursor(0, 24);
-                    M5.Display.printf("CO2:%4d", co2);
-                    M5.Display.setCursor(0, 64);
-                    M5.Display.printf("HUM:%.1f", hum);
-                    M5.Display.setCursor(0, 104);
-                    M5.Display.printf("TMP:%.1f", tmp);
+                    drawCO2data(co2, hum, tmp);
 
                     // intervalごとにデータ送信
                     current_moment = millis();
@@ -128,21 +136,29 @@ void setup()
     prev_moment = 0; // used for ThingSpeak interval
 
     M5.begin();
-    M5.Display.setRotation(1);
     Serial.begin(9600);
+
+    // Setup display and canavs
+    M5.Display.setRotation(1);
+    // M5.Display.setColorDepth(24);
+    canvas.createSprite(M5.Display.width(), M5.Display.height());
 
     // Setup Wi-Fi
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
     while (WiFi.status() != WL_CONNECTED)
     {
-        delay(500);
-        M5.Lcd.print('.');
+        delay(200);
+        canvas.print('.');
     }
-    M5.Lcd.println("\nWiFi connected");
+    canvas.println("\nWiFi connected");
     delay(3000);
 
-    M5.Display.clear();
+    // M5.Display.clear();
     usbDev.begin();
+
+    // Draw
+    M5.Display.startWrite(); 
+    canvas.pushSprite(0, 0);
 }
 
 void loop()
