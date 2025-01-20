@@ -172,7 +172,23 @@ void setup()
     canvas.pushSprite(0, 0);
 }
 
+unsigned long lastReconnectTime = 0; // Store the last reconnect time
+
 void loop()
 {
     usbDev.task();
+
+    // Check if 24 hours have passed since the last reconnect
+    if (millis() - lastReconnectTime >= 24 * 60 * 60 * 1000) {
+        // Attempt to reconnect to WiFi
+        WiFi.disconnect();
+        WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+        lastReconnectTime = millis(); // Update the last reconnect time
+
+        // Wait for connection
+        while (WiFi.status() != WL_CONNECTED) {
+            delay(200);
+        }
+        Serial.println("WiFi reconnected");
+    }
 }
