@@ -16,6 +16,26 @@ unsigned long current_moment;
 enum DisplayMode { CO2, TEMPERATURE, HUMIDITY};
 DisplayMode currentMode = CO2; // Declare and initialize currentMode
 
+float calculateSaturatedWaterVaporDensity(float temperature, bool ignoreConstant) {
+    // temperature is in Celsius
+    // https://ja.wikipedia.org/wiki/%E9%A3%BD%E5%92%8C%E6%B0%B4%E8%92%B8%E6%B0%97%E9%87%8F
+    if (ignoreConstant) {
+        return pow(10, ((7.5 * temperature) / (temperature + 237.3)));
+    } else {
+        return 6.1078 * pow(10, ((7.5 * temperature) / (temperature + 237.3)));
+    }
+}
+
+float calculateCorrectedHumidity(float temp0, float temp1, float hum0) {
+    // https://blog.mono0x.net/2023/09/03/ud-co2s-temperature-and-humidity/
+    // temp0: temperature before correction (read from sensor)
+    // temp1: temperature after correction
+    // hum0: humidity before correction (read from sensor)
+    float sat0 = calculateSaturatedWaterVaporDensity(temp0, true);
+    float sat1 = calculateSaturatedWaterVaporDensity(temp1, true);
+    return (hum0) * (sat0 / sat1);
+}
+
 void SendSensorData(int co2, float hum, float temp) {
     // Initialize ThingSpeak
     WiFiClient client;
@@ -116,7 +136,10 @@ public:
                 value += (char)data[i];
             else if (value.length()) {
                 if (sscanf(value.c_str(), "CO2=%d,HUM=%f,TMP=%f", &co2, &hum, &tmp) == 3) {
+                    // Sensor value correction
+                    hum = calculateCorrectedHumidity(tmp, tmp-4.5F, hum);
                     tmp -= 4.5F;
+
                     Serial.println(toString());
 
                     // Store the latest values without immediate redraw
