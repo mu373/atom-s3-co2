@@ -4,7 +4,7 @@
 #include "ThingSpeak.h"
 #include "config.h" //enter api key and wifi information
 
-#define DATA_DRAW_INTERVAL 3000
+#define DATA_DRAW_INTERVAL 500
 
 M5Canvas canvas(&M5.Display);
 
