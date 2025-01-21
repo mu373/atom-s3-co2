@@ -144,8 +144,8 @@ void setup() {
     M5.begin();
     Serial.begin(9600);
 
-    // Setup display and canavs
-    M5.Display.setBrightness(100);
+    // Setup display and canvas
+    M5.Display.setBrightness(90);
     M5.Display.setRotation(1);
     canvas.createSprite(M5.Display.width(), M5.Display.height());
 
