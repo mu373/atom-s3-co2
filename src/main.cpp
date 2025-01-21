@@ -13,7 +13,7 @@ unsigned long prev_moment_thingspeak = 0;
 unsigned long prev_moment_draw = 0;
 unsigned long current_moment;
 
-enum DisplayMode { CO2, HUMIDITY, TEMPERATURE };
+enum DisplayMode { CO2, TEMPERATURE, HUMIDITY};
 DisplayMode currentMode = CO2; // Declare and initialize currentMode
 
 void SendSensorData(int co2, float hum, float temp) {
