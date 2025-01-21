@@ -24,12 +24,9 @@ void SendSensorData(int co2, float hum, float temp) {
 
     // Write to the ThingSpeak channel
     int res = ThingSpeak.writeFields(THING_SPEAK_CHANNEL, THING_SPEAK_API_KEY);
-    if (res == 200)
-    {
+    if (res == 200) {
         Serial.println("Channel update successful.");
-    }
-    else
-    {
+    } else {
         Serial.println(String("Problem updating channel. HTTP error code ") + res);
     }
 }
@@ -73,42 +70,35 @@ void drawCO2data(int co2, float hum, float tmp) {
     canvas.pushSprite(0, 0);
 }
 
-class UDCO2S : public EspUsbHostSerial
-{
+class UDCO2S : public EspUsbHostSerial {
 public:
     String value;
     int co2 = 0;
     float hum = 0.0F;
     float tmp = 0.0F;
 
-    UDCO2S() : EspUsbHostSerial(0x04d8, 0xe95a){};
+    UDCO2S() : EspUsbHostSerial(0x04d8, 0xe95a) {};
 
-    String toString()
-    {
+    String toString() {
         char bufs[30];
         sprintf(bufs, "CO2=%d,HUM=%.1f,TMP=%.1f", co2, hum, tmp);
         return String(bufs);
     }
 
-    virtual void onNew() override
-    {
+    virtual void onNew() override {
         Serial.println(("Manufacturer:" + getManufacturer()).c_str());
         Serial.println(("Product:" + getProduct()).c_str());
         // submit((uint8_t *)"STP\r", 4);
         // delay(500);
         submit((uint8_t *)"STA\r", 4);
     }
-    virtual void onReceive(const uint8_t *data, const size_t length) override
-    {
-        for (int i = 0; i < length; i++)
-        {
+
+    virtual void onReceive(const uint8_t *data, const size_t length) override {
+        for (int i = 0; i < length; i++) {
             if (data[i] >= 0x20)
                 value += (char)data[i];
-            else if (value.length())
-            {
-                if (sscanf(value.c_str(), "CO2=%d,HUM=%f,TMP=%f", &co2, &hum, &tmp) == 3)
-                {
-                    // Need correction ?
+            else if (value.length()) {
+                if (sscanf(value.c_str(), "CO2=%d,HUM=%f,TMP=%f", &co2, &hum, &tmp) == 3) {
                     tmp -= 4.5F;
                     // hum = (int)(10.0F * hum * 4.0F / 3.0F + 0.5F) / 10.0F;
                     Serial.println(toString());
@@ -134,17 +124,15 @@ public:
             }
         }
     }
-    virtual void onGone()
-    {
+
+    virtual void onGone() {
         Serial.println("disconnected");
     }
 };
 
 UDCO2S usbDev;
 
-void setup()
-{
-
+void setup() {
     M5.begin();
     Serial.begin(9600);
 
@@ -156,8 +144,7 @@ void setup()
 
     // Setup Wi-Fi
     WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-    while (WiFi.status() != WL_CONNECTED)
-    {
+    while (WiFi.status() != WL_CONNECTED) {
         delay(200);
         canvas.print('.');
     }
@@ -174,8 +161,7 @@ void setup()
 
 unsigned long lastReconnectTime = 0; // Store the last reconnect time
 
-void loop()
-{
+void loop() {
     usbDev.task();
 
     // Check if 24 hours have passed since the last reconnect
