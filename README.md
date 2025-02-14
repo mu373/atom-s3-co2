@@ -17,5 +17,8 @@ CO2 monitor integration for M5Stack AtomS3. Reads sensor values from [UD-CO2S](h
 - Provide power 5V supply
 - When AtomS3 is booted up, it will automatically connect to Wi-Fi and start reading values from the sensor.
 
+## License
+MIT license excluding files under `lib/EspUsbHost/`. See [here](https://github.com/mu373/tail-estimation/blob/master/LICENSE.md) for details.
+
 ## References
 - This project was developed based on codes/libraries from [wakwak-koba/EspUsbHost](https://github.com/wakwak-koba/EspUsbHost).
