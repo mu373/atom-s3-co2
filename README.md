@@ -1,5 +1,5 @@
 # atom-s3-co2
-CO2 monitor integration for M5Stack AtomS3. Reads sensor values from [UD-CO2S](https://www.iodata.jp/product/tsushin/iot/ud-co2s/), and sends values to ThingsSpeak IoT platform.
+CO2 monitor integration for M5Stack AtomS3. Reads sensor values from [UD-CO2S](https://www.iodata.jp/product/tsushin/iot/ud-co2s/), and sends values to ThingsSpeak IoT platform. Temperature, Humidity, CO2 concentration are shown in the display. Click on the display button to switch between each readings.
 
 ## Materials
 - M5Stack AtomS3
