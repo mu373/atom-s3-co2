@@ -13,7 +13,7 @@ unsigned long prev_moment_thingspeak = 0;
 unsigned long prev_moment_draw = 0;
 unsigned long current_moment;
 
-enum DisplayMode { CO2, TEMPERATURE, HUMIDITY};
+enum DisplayMode { CO2, TEMPERATURE, HUMIDITY, ABSOLUTE_HUMIDITY };
 DisplayMode currentMode = CO2; // Declare and initialize currentMode
 
 float calculateSaturatedWaterVaporPressure(float temperature, bool ignoreConstant) {
@@ -34,6 +34,21 @@ float calculateCorrectedHumidity(float temp0, float temp1, float hum0) {
     float sat0 = calculateSaturatedWaterVaporPressure(temp0, true);
     float sat1 = calculateSaturatedWaterVaporPressure(temp1, true);
     return (hum0) * (sat0 / sat1);
+}
+
+float calculateAbsoluteHumidity(float temperature, float humidity) {
+    // Absolute humidity (volumetric humidity) H (g/m3) is calculated using the formula:
+    // H = 216.67 * ( P_w / (T + 273.15) )
+    // when
+    // P_w: water vapor pressure (hPa), function of temperature and humidity
+    // T: temperature (C)
+
+    float saturatedWaterVaporPressure = calculateSaturatedWaterVaporPressure(temperature, false); // P_s (hPa)
+    float waterVaporPressure = saturatedWaterVaporPressure * (humidity / 100); // P_w (hPa)
+
+    float absoluteHumidity = 216.67 * ( waterVaporPressure / (temperature + 273.15 ) );
+
+    return absoluteHumidity;
 }
 
 void SendSensorData(int co2, float hum, float temp) {
@@ -98,11 +113,15 @@ void drawData(float val, DisplayMode type) {
     } else if (type == HUMIDITY) {
         canvas.drawCentreString(String(val, 1), M5.Display.width() / 2, M5.Display.height() / 2 - 15); // Display humidity value
         canvas.setTextSize(0.9); // Set text size for mode label
-        canvas.drawString("%", M5.Display.width() - 30, 30); // Display "HUM" in the top right corner
+        canvas.drawString("%", M5.Display.width() - 30, 30);
+    } else if (type == ABSOLUTE_HUMIDITY ) {
+        canvas.drawCentreString(String(val, 1), M5.Display.width() / 2, M5.Display.height() / 2 - 15); // Display absolute humidity value
+        canvas.setTextSize(0.7); // Set text size for mode label
+        canvas.drawString("g/m3", M5.Display.width() - 30, 30);
     } else if (type == TEMPERATURE) {
         canvas.drawCentreString(String(val, 1), M5.Display.width() / 2, M5.Display.height() / 2 - 15); // Display temperature value
         canvas.setTextSize(0.9); // Set text size for mode label
-        canvas.drawString("`C", M5.Display.width() - 30, 30); // Display "TMP" in the top right corner
+        canvas.drawString("`C", M5.Display.width() - 30, 30);
     }
 
     // Push image to display
@@ -115,6 +134,7 @@ public:
     int co2 = 0;
     float hum = 0.0F;
     float tmp = 0.0F;
+    float absHum = 0.0F;
 
     UDCO2S() : EspUsbHostSerial(0x04d8, 0xe95a) {};
 
@@ -139,6 +159,7 @@ public:
                     // Sensor value correction
                     hum = calculateCorrectedHumidity(tmp, tmp-4.5F, hum);
                     tmp -= 4.5F;
+                    absHum = calculateAbsoluteHumidity(tmp, hum);
 
                     Serial.println(toString());
 
@@ -199,7 +220,7 @@ void loop() {
     // Check if the button is pressed
     if (digitalRead(BTN_GPIO) == LOW) { // Check if button is pressed
         Serial.println("Button pressed!"); // Debug output
-        currentMode = static_cast<DisplayMode>((currentMode + 1) % 3); // Cycle through modes
+        currentMode = static_cast<DisplayMode>((currentMode + 1) % 4); // Cycle through modes
         delay(200); // Debounce delay
     }
 
@@ -212,9 +233,11 @@ void loop() {
         if (currentMode == CO2) {
             drawData(usbDev.co2, CO2);
         } else if (currentMode == HUMIDITY) {
-            drawData(usbDev.hum, HUMIDITY); // Correctly display humidity
+            drawData(usbDev.hum, HUMIDITY);
+        } else if (currentMode == ABSOLUTE_HUMIDITY) {
+            drawData(usbDev.absHum, ABSOLUTE_HUMIDITY);
         } else if (currentMode == TEMPERATURE) {
-            drawData(usbDev.tmp, TEMPERATURE); // Correctly display temperature
+            drawData(usbDev.tmp, TEMPERATURE);
         }
     }
 
