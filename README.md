@@ -1,11 +1,25 @@
 # atom-s3-co2
-CO2 monitor integration for M5Stack AtomS3. Reads sensor values from [UD-CO2S](https://www.iodata.jp/product/tsushin/iot/ud-co2s/), and sends values to ThingsSpeak IoT platform. Temperature, Humidity, CO2 concentration are shown in the display. Click on the display button to switch between each readings.
+CO2 monitor integration for M5Stack AtomS3. Reads sensor values from [UD-CO2S](https://www.iodata.jp/product/tsushin/iot/ud-co2s/), and sends values to ThingsSpeak IoT platform. Temperature, Humidity (relative and absolute), CO2 concentration are shown in the display. Click on the display button to switch between each readings.
 
 ## Materials
 - M5Stack AtomS3
 - [UD-CO2S](https://www.iodata.jp/product/tsushin/iot/ud-co2s/)
-- 5V power supply
-- USB type C to A adaptor (used to connect AtomS3 and UD-CO2S)
+- USB AC adapter (Type A)
+- USB Type A male to male cable
+- [USB Type A splitter](https://www.amazon.com/dp/B085BJRZN2)
+    - One female end connects to power
+    - One female end connects to UD-CO2S
+    - Male end connects to Atom S3, using Type C to A adapter
+- USB Type C to A adapter (used to connect AtomS3 to USB splitter)
+- USB Type C extension cable (optional, for AtomS3 connection)
+
+```mermaid
+graph LR
+    AC["USB AC Adapter"] -->|Type A Male-to-Male Cable| Splitter["USB Type A Splitter"]
+    Splitter -->Adapter["USB Type C to A Adapter"]
+    Adapter --> |Type C Extension Cable, optional| AtomS3["AtomS3"]
+    Splitter --> UDCO2S["UD-CO2S"]
+```
 
 ## Setup
 - Prepare environment: VSCode + platform.io
