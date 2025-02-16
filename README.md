@@ -5,19 +5,21 @@ CO2 monitor integration for M5Stack AtomS3. Reads sensor values from [UD-CO2S](h
 - M5Stack AtomS3
 - [UD-CO2S](https://www.iodata.jp/product/tsushin/iot/ud-co2s/)
 - USB AC adapter (Type A)
-- USB Type A male to male cable
+- [USB Type A male to male cable](https://www.amazon.com/dp/B00HSS9KJY)
 - [USB Type A splitter](https://www.amazon.com/dp/B085BJRZN2)
     - One female end connects to power
     - One female end connects to UD-CO2S
     - Male end connects to Atom S3, using Type C to A adapter
-- USB Type C to A adapter (used to connect AtomS3 to USB splitter)
-- USB Type C extension cable (optional, for AtomS3 connection)
+- [USB Type C (male) to A (female) adapter](https://www.amazon.com/dp/B0C9VD4YTK)
+    - Used to connect AtomS3 to USB splitter
+- [USB Type C Extender Adapter](https://www.amazon.com/dp/B0D9XHNDX6)
 
 ```mermaid
 graph LR
     AC["USB AC Adapter"] -->|Type A Male-to-Male Cable| Splitter["USB Type A Splitter"]
     Splitter -->Adapter["USB Type C to A Adapter"]
-    Adapter --> |Type C Extension Cable, optional| AtomS3["AtomS3"]
+    Adapter --> Extension["Type C Extender"]
+    Extension --> |USB Type C Cable| AtomS3
     Splitter --> UDCO2S["UD-CO2S"]
 ```
 
