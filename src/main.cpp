@@ -16,7 +16,7 @@ unsigned long current_moment;
 enum DisplayMode { CO2, TEMPERATURE, HUMIDITY};
 DisplayMode currentMode = CO2; // Declare and initialize currentMode
 
-float calculateSaturatedWaterVaporDensity(float temperature, bool ignoreConstant) {
+float calculateSaturatedWaterVaporPressure(float temperature, bool ignoreConstant) {
     // temperature is in Celsius
     // https://ja.wikipedia.org/wiki/%E9%A3%BD%E5%92%8C%E6%B0%B4%E8%92%B8%E6%B0%97%E9%87%8F
     if (ignoreConstant) {
@@ -31,8 +31,8 @@ float calculateCorrectedHumidity(float temp0, float temp1, float hum0) {
     // temp0: temperature before correction (read from sensor)
     // temp1: temperature after correction
     // hum0: humidity before correction (read from sensor)
-    float sat0 = calculateSaturatedWaterVaporDensity(temp0, true);
-    float sat1 = calculateSaturatedWaterVaporDensity(temp1, true);
+    float sat0 = calculateSaturatedWaterVaporPressure(temp0, true);
+    float sat1 = calculateSaturatedWaterVaporPressure(temp1, true);
     return (hum0) * (sat0 / sat1);
 }
 
